@@ -13,6 +13,8 @@ It demonstrates:
 - classical machine learning baseline
 - two hyperparameter settings
 - basic overfitting observation
+- lightweight transfer learning with a Hugging Face model
+- use of pandas and NumPy
 - report generation
 
 ## Relation to the VelpTEC Exercise
@@ -26,11 +28,16 @@ c) Train a simple chatbot model with the collected data and experiment with at l
 d) Implement transfer learning using a pretrained model and compare the results.
 ```
 
-This quick lab currently focuses on steps **a)**, **b)** and **c)**.
+This quick lab covers all four steps in a lightweight and reproducible way.
 
-Step **d)**, transfer learning with a pretrained model, is planned as a later extension using Hugging Face Transformers or pretrained sentence embeddings.
+| VelpTEC step | Implementation in this lab |
+|---|---|
+| a) Synthetic training data | `quick_intent_lab.py` generates customer-support examples |
+| b) Data-quality evaluation | `quick_intent_lab.py` checks completeness, class balance and diversity |
+| c) Simple chatbot model training | `quick_intent_lab.py` trains TF-IDF + Logistic Regression models |
+| d) Transfer learning | `huggingface_transfer_lab.py` uses a pretrained Hugging Face SentenceTransformer model |
 
-The current implementation is intentionally lightweight, reproducible and suitable as a first baseline before adding a more complex pretrained model.
+The current implementation keeps the scope intentionally small. The goal is not to build a full production chatbot, but to demonstrate the main machine learning concepts in a practical way.
 
 ## Use Case
 
@@ -57,15 +64,23 @@ The original exercise mentions model training and transfer learning. For a short
 Text → TF-IDF → Logistic Regression → Intent
 ```
 
-This approach is fast, reproducible and useful as a baseline.
+Then it adds a lightweight transfer-learning extension:
 
-A modern extension could later use:
+```text
+Text → Hugging Face SentenceTransformer embeddings → Logistic Regression → Intent
+```
 
-- pretrained sentence embeddings
-- Hugging Face Transformers
-- DistilBERT fine-tuning
-- semantic routing
-- evaluation with a larger dataset
+This approach is fast, reproducible and suitable for a portfolio lab.
+
+A more advanced extension could later use:
+
+- full Hugging Face Transformer fine-tuning
+- DistilBERT or multilingual BERT for sequence classification
+- larger training datasets
+- confusion matrices
+- experiment tracking
+- model persistence
+- inference API
 
 ## Files
 
@@ -73,18 +88,36 @@ A modern extension could later use:
 chapter_05_training_quick_lab/
 ├── README.md
 ├── quick_intent_lab.py
+├── huggingface_transfer_lab.py
 ├── synthetic_customer_support_intents.csv
 └── reports/
-    └── quick_lab_report.md
+    ├── quick_lab_report.md
+    ├── huggingface_transfer_report.md
+    └── huggingface_transfer_predictions.csv
 ```
 
-## How to run
+## Setup
 
 From the repository root:
 
 ```powershell
 cd C:\dev\ai-development-velptec
 .\.venv\Scripts\Activate.ps1
+```
+
+Install the additional dependency for the Hugging Face transfer-learning lab:
+
+```powershell
+pip install sentence-transformers
+```
+
+The package `sentence-transformers` loads pretrained embedding models from Hugging Face and makes it easy to encode sentences as vectors.
+
+## How to run the classical quick lab
+
+Run:
+
+```powershell
 python exercises\chapter_05_training_quick_lab\quick_intent_lab.py
 ```
 
@@ -96,15 +129,57 @@ Dataset saved to: ...
 Report saved to: ...
 ```
 
-## What the script does
+This script generates the synthetic dataset, trains the TF-IDF baseline models and writes the first report.
 
-The script performs five steps:
+## How to run the Hugging Face transfer-learning lab
+
+Run:
+
+```powershell
+python exercises\chapter_05_training_quick_lab\huggingface_transfer_lab.py
+```
+
+Expected output:
+
+```text
+Hugging Face transfer-learning lab completed successfully.
+Dataset loaded from: ...
+Report saved to: ...
+Predictions saved to: ...
+
+Model comparison:
+- TF-IDF + Logistic Regression baseline: accuracy=...
+- Hugging Face sentence embeddings + Logistic Regression: accuracy=...
+```
+
+The first execution may take longer because the pretrained model has to be downloaded.
+
+## What the scripts do
+
+The lab contains two scripts.
+
+### 1. `quick_intent_lab.py`
+
+This script performs the following steps:
 
 1. Generates synthetic customer-support examples.
 2. Saves the generated dataset as CSV.
 3. Evaluates data quality.
 4. Trains two TF-IDF + Logistic Regression models.
 5. Writes a Markdown report with dataset and model results.
+
+### 2. `huggingface_transfer_lab.py`
+
+This script performs the following steps:
+
+1. Loads the synthetic dataset with pandas.
+2. Trains a classical TF-IDF baseline for comparison.
+3. Loads a pretrained Hugging Face SentenceTransformer model.
+4. Converts customer messages into semantic sentence embeddings.
+5. Uses NumPy to inspect the embedding matrix.
+6. Trains a Logistic Regression classifier on top of the embeddings.
+7. Compares the baseline with the Hugging Face approach.
+8. Saves a Markdown report and prediction CSV.
 
 ## Data Generation
 
@@ -191,7 +266,7 @@ The following scikit-learn components are used:
 | `LogisticRegression` | Trains the intent classification model |
 | `train_test_split` | Splits the dataset into training and test data |
 | `Pipeline` | Combines text vectorization and classification into one workflow |
-| `accuracy_score` | Calculates training and test accuracy |
+| `accuracy_score` | Calculates model accuracy |
 | `classification_report` | Generates precision, recall and F1-score per intent |
 
 The relevant imports in `quick_intent_lab.py` are:
@@ -210,7 +285,7 @@ For this quick lab, scikit-learn is a suitable choice because it is lightweight,
 
 ## Model Pipeline
 
-The model pipeline is implemented as follows:
+The classical model pipeline is implemented as follows:
 
 ```text
 Customer message
@@ -327,56 +402,198 @@ A simple interpretation is:
 
 This makes the lab useful for understanding the relationship between hyperparameters, model accuracy and generalization.
 
-## Report
+## Transfer Learning with Hugging Face
 
-After execution, the script creates a Markdown report in:
+The second script, `huggingface_transfer_lab.py`, implements step **d)** of the VelpTEC task in a lightweight way.
+
+The task asks for transfer learning with a pretrained model and comparison with the previously trained model.
+
+This lab uses the pretrained Hugging Face model:
+
+```text
+sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+```
+
+The transfer-learning pipeline is:
+
+```text
+Customer message
+→ pretrained Hugging Face sentence embedding model
+→ semantic vector representation
+→ Logistic Regression classifier
+→ Predicted intent
+```
+
+The model converts each customer message into a dense semantic vector. The classifier is then trained on these vectors using the synthetic customer-support dataset.
+
+This is a lightweight transfer-learning approach because the pretrained Transformer model is reused as a frozen feature extractor. The task-specific classifier is trained on top of the pretrained embeddings.
+
+A full fine-tuning approach would update the weights of the Transformer model itself. That would be more computationally expensive and is intentionally left out of this quick lab.
+
+## Hugging Face and Sentence Embeddings
+
+The lab uses the following import:
+
+```python
+from sentence_transformers import SentenceTransformer
+```
+
+The pretrained model is loaded with:
+
+```python
+embedding_model = SentenceTransformer(MODEL_NAME)
+```
+
+The embeddings are generated with:
+
+```python
+train_embeddings = embedding_model.encode(
+    x_train.tolist(),
+    convert_to_numpy=True,
+    normalize_embeddings=True,
+    show_progress_bar=True,
+)
+```
+
+The resulting embeddings are then used as numerical input for a Logistic Regression classifier.
+
+```python
+classifier.fit(train_embeddings, y_train)
+```
+
+This demonstrates how a pretrained language model can be reused for a downstream classification task.
+
+## Use of pandas and NumPy
+
+This lab also demonstrates basic use of **pandas** and **NumPy**.
+
+### pandas
+
+pandas is used to load and clean the dataset:
+
+```python
+df = pd.read_csv(dataset_path)
+df = df.dropna(subset=["text", "intent"])
+df["text"] = df["text"].astype(str).str.strip()
+df["intent"] = df["intent"].astype(str).str.strip()
+```
+
+pandas is also used to create a prediction table:
+
+```python
+prediction_df = pd.DataFrame(
+    {
+        "text": x_test.tolist(),
+        "true_intent": y_test.tolist(),
+        "predicted_intent": predictions.tolist(),
+    }
+)
+```
+
+The prediction table is saved as CSV:
+
+```python
+hf_result["predictions"].to_csv(predictions_path, index=False, encoding="utf-8")
+```
+
+### NumPy
+
+NumPy is used to inspect the generated embedding matrix:
+
+```python
+embedding_shape = train_embeddings.shape
+average_embedding_norm = float(np.mean(np.linalg.norm(train_embeddings, axis=1)))
+```
+
+This shows that the text messages have been converted into numerical vector representations.
+
+## Reports
+
+After execution, the lab creates two Markdown reports.
+
+### Classical lab report
 
 ```text
 reports/quick_lab_report.md
 ```
 
-The report contains:
+This report contains:
 
 - data-quality summary
 - class balance
-- comparison of both model configurations
+- comparison of both classical model configurations
 - classification reports
 - short reflection
 
-This makes the lab easier to review and suitable for GitHub documentation.
+### Hugging Face transfer-learning report
 
-## Current Scope and Planned Extension
+```text
+reports/huggingface_transfer_report.md
+```
 
-The current quick lab covers a lightweight implementation of steps **a)**, **b)** and **c)** of the VelpTEC task.
+This report contains:
 
-Step **d)** requires transfer learning with a pretrained model. This is not yet implemented in the quick lab.
+- baseline accuracy
+- Hugging Face transfer-learning accuracy
+- embedding matrix information
+- classification reports
+- reflection on transfer learning
 
-A planned extension could compare the current scikit-learn baseline with a pretrained model, for example:
+The Hugging Face script also creates:
+
+```text
+reports/huggingface_transfer_predictions.csv
+```
+
+This file contains sample predictions with:
+
+- customer message
+- true intent
+- predicted intent
+
+## Current Scope and Limitations
+
+This lab is intentionally small and fast.
+
+The current scope includes:
+
+- synthetic dataset generation
+- basic data-quality checks
+- classical ML baseline
+- two hyperparameter settings
+- lightweight Hugging Face transfer learning
+- pandas and NumPy usage
+- Markdown report generation
+
+The current limitations are:
+
+- The dataset is synthetic and small.
+- The templates are controlled and predictable.
+- The classifier predicts intents but does not generate full chatbot responses.
+- The Hugging Face model is used as a frozen embedding model.
+- The Transformer model itself is not fully fine-tuned.
+- There is no model persistence or deployment step.
+
+## Reflection
+
+This lab is not intended to replace modern LLM- or production-grade Transformer chatbot development.
+
+Instead, it provides a fast and transparent learning pipeline.
+
+The classical TF-IDF baseline is useful because it is simple, explainable and fast. It helps establish a comparison point before using more complex models.
+
+The Hugging Face extension demonstrates how pretrained Transformer-based sentence embeddings can be reused for a downstream intent-classification task. This connects the classical chatbot-training workflow with modern AI Development practices such as transfer learning, contextual embeddings and semantic classification.
+
+For a future extension, this lab could be expanded with:
 
 ```text
 Synthetic dataset
 → baseline TF-IDF classifier
 → pretrained sentence embeddings
-→ Hugging Face Transformer fine-tuning
-→ model comparison
+→ full Hugging Face Transformer fine-tuning
+→ model persistence
+→ inference API
+→ model monitoring
 ```
 
-This would connect the classical chatbot-training workflow with modern AI Development practices such as transfer learning, contextual embeddings and semantic classification.
-
-## Reflection
-
-This lab is not intended to replace modern LLM- or Transformer-based chatbot development.
-
-Instead, it provides a fast and transparent baseline. Such baselines are useful because they help compare whether a more complex model is actually needed.
-
-The implementation shows that a simple intent-classification model can already be trained with synthetic data and a classical machine learning pipeline.
-
-At the same time, the limitations are clear:
-
-- The dataset is synthetic and small.
-- The templates are controlled and predictable.
-- The model does not understand language deeply.
-- It classifies intents but does not generate full chatbot responses.
-- It does not yet use transfer learning or pretrained Transformer models.
-
-For modern AI Development, the next step would be to compare this baseline with a pretrained model, for example using Hugging Face Transformers or sentence embeddings.
+This would turn the quick lab into a more complete portfolio project.

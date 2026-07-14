@@ -1,0 +1,31 @@
+text,true_intent,predicted_intent
+Ich möchte Details zu Buch wissen.,product_information,product_information
+Welche Eigenschaften hat T-Shirt?,product_information,product_information
+Wie bekomme ich eine Erstattung für Kamera?,returns_refund,returns_refund
+Welche Eigenschaften hat Smartphone?,product_information,product_information
+Kann ich Buch zurückgeben?,returns_refund,returns_refund
+Ich brauche Informationen zu Laptop.,product_information,product_information
+Wie kann ich Smartphone retournieren?,returns_refund,returns_refund
+Wo ist mein Paket B2045?,shipping_status,shipping_status
+Warum wurde meine Kreditkarte nicht akzeptiert?,payment_issue,payment_issue
+Welche Eigenschaften hat Smartphone?,product_information,product_information
+Meine Zahlung wurde abgelehnt.,payment_issue,payment_issue
+Die Zahlung für meine Bestellung funktioniert nicht.,payment_issue,payment_issue
+Meine Zahlung wurde abgelehnt.,payment_issue,payment_issue
+Welche Eigenschaften hat Kamera?,product_information,product_information
+Ist Smartphone aktuell verfügbar?,product_information,product_information
+Wie bekomme ich eine Erstattung für Monitor?,returns_refund,returns_refund
+Wie kann ich Laptop retournieren?,returns_refund,returns_refund
+Ich möchte Buch zurücksenden.,returns_refund,returns_refund
+Die Zahlung für meine Bestellung funktioniert nicht.,payment_issue,payment_issue
+Wie ist der Versandstatus von B2045?,shipping_status,shipping_status
+Kann ich Kamera zurückgeben?,returns_refund,returns_refund
+Ich warte noch auf meine Bestellung D9012.,shipping_status,shipping_status
+Wie ist der Versandstatus von A1001?,shipping_status,shipping_status
+Wie ist der Versandstatus von B2045?,shipping_status,shipping_status
+Ich warte noch auf meine Bestellung E4455.,shipping_status,shipping_status
+Gibt es ein Update zur Lieferung B2045?,shipping_status,shipping_status
+Die Zahlung für meine Bestellung funktioniert nicht.,payment_issue,payment_issue
+Ich brauche Hilfe bei der Rücksendung von Tablet.,returns_refund,returns_refund
+Meine Zahlung wurde abgelehnt.,payment_issue,payment_issue
+Warum wurde meine Kreditkarte nicht akzeptiert?,payment_issue,payment_issue
